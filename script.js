@@ -15,6 +15,57 @@ document.getElementById("title").textContent = "For " + HER_NAME;
 var env = document.getElementById("env"), letter = document.getElementById("letter"), more = document.getElementById("more");
 var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+
+// 🎵 MUSIC: put your song next to index.html and name it music.mp3.
+// If music.mp3 is missing, a soft music-box "Happy Birthday" plays instead.
+var musicBtn = document.getElementById("music");
+var song = new Audio("music.mp3");
+song.loop = true; song.volume = 0.6;
+var usingSynth = false, muted = false, actx = null, synthTimer = null;
+
+var TUNE = [[392,.75],[392,.25],[440,1],[392,1],[523,1],[494,2],
+            [392,.75],[392,.25],[440,1],[392,1],[587,1],[523,2],
+            [392,.75],[392,.25],[784,1],[659,1],[523,1],[494,1],[440,2],
+            [698,.75],[698,.25],[659,1],[523,1],[587,1],[523,2]];
+function playTune(){
+  if(!actx || muted) return;
+  var t = actx.currentTime + 0.1, beat = 0.6;
+  TUNE.forEach(function(n){
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = "triangle"; o.frequency.value = n[0];
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.25, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + n[1]*beat*1.6);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + n[1]*beat*1.6 + 0.05);
+    t += n[1]*beat;
+  });
+  synthTimer = setTimeout(playTune, (t - actx.currentTime + 1.2) * 1000);
+}
+function startSynth(){
+  usingSynth = true;
+  try{
+    actx = new (window.AudioContext || window.webkitAudioContext)();
+    playTune();
+  }catch(e){}
+}
+function startMusic(){
+  musicBtn.hidden = false;
+  var p = song.play();
+  if(p && p.catch) p.catch(startSynth);
+  song.addEventListener("error", function(){ if(!usingSynth) startSynth(); });
+}
+musicBtn.addEventListener("click", function(){
+  muted = !muted;
+  musicBtn.textContent = muted ? "🔇" : "🔊";
+  if(usingSynth){
+    if(muted){ clearTimeout(synthTimer); }
+    else { playTune(); }
+  } else {
+    if(muted) song.pause(); else song.play();
+  }
+});
+
 function hearts(n){
   if(reduce) return;
   for(var i=0;i<n;i++){
@@ -47,6 +98,7 @@ function addLine(html, done){
 
 env.addEventListener("click",function(){
   env.classList.add("open");
+  startMusic();
   hearts(20);
   setTimeout(function(){
     letter.classList.add("show");
