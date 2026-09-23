@@ -37,3 +37,6 @@ box-shadow:0 16px 40px rgba(0,0,0,.35);display:none;min-height:120px}
 #gallery figure:nth-child(1){--r:-3deg}#gallery figure:nth-child(2){--r:2deg}#gallery figure:nth-child(3){--r:2.5deg}#gallery figure:nth-child(4){--r:-2deg}
 #fin{margin-top:24px}
 @media(prefers-reduced-motion:reduce){#gallery figure{transition:none}}
+#music{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:1.3rem;cursor:pointer;z-index:10}
+#music[hidden]{display:none}
+#music:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
